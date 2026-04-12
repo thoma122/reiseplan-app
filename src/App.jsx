@@ -416,15 +416,24 @@ Format:
   ]
 }`;
 
-const UnsplashImg = ({ query, style: s, className, onError }) => (
-  <img
-    src={`https://source.unsplash.com/featured/800x500/?${encodeURIComponent(query)}`}
-    style={s}
-    className={className}
-    onError={onError}
-    alt={query}
-  />
-);
+const GRAD_COLORS = [
+  ["#1a3a2a","#2d5a3d"],["#1a2a3a","#2d4a6a"],["#3a1a1a","#6a2d2d"],
+  ["#2a1a3a","#4a2d6a"],["#1a3a3a","#2d6a5a"],["#3a2a1a","#6a4a2d"],
+];
+const gradFor = (str="") => {
+  let h=0; for(let i=0;i<str.length;i++) h=str.charCodeAt(i)+((h<<5)-h);
+  const [c1,c2]=GRAD_COLORS[Math.abs(h)%GRAD_COLORS.length];
+  return `linear-gradient(135deg,${c1},${c2})`;
+};
+const TravelImg = ({ query, dest="" }) => {
+  const [failed, setFailed] = useState(false);
+  if (failed) return (
+    <div style={{width:"100%",height:"100%",background:gradFor(dest+query),display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <span style={{color:"rgba(255,255,255,0.15)",fontSize:"11px",letterSpacing:"3px",textTransform:"uppercase"}}>{dest}</span>
+    </div>
+  );
+  return <img src={`https://loremflickr.com/800/500/${encodeURIComponent(query)}`} alt={query} style={{width:"100%",height:"100%",objectFit:"cover"}} onError={()=>setFailed(true)} />;
+};
 
 export default function ReiseplanGenerator() {
   const [form, setForm] = useState({
@@ -553,7 +562,7 @@ export default function ReiseplanGenerator() {
 
             {/* HERO */}
             <div className="dest-hero">
-              <UnsplashImg query={`${plan.destinasjon_engelsk || plan.destinasjon} city landmark`} />
+              <TravelImg query={`${plan.destinasjon_engelsk || plan.destinasjon} city landmark`} dest={plan.destinasjon_engelsk || plan.destinasjon} />
               <div className="dest-hero-overlay">
                 <div className="dest-title">{plan.destinasjon}</div>
                 <div className="dest-meta">
@@ -572,7 +581,7 @@ export default function ReiseplanGenerator() {
               <div className="img-gallery">
                 {plan.bilder_sokeord.slice(0, 5).map((kw, i) => (
                   <div key={i} className="gallery-img">
-                    <UnsplashImg query={`${plan.destinasjon_engelsk || plan.destinasjon} ${kw}`} />
+                    <TravelImg query={`${plan.destinasjon_engelsk || plan.destinasjon} ${kw}`} dest={plan.destinasjon_engelsk || plan.destinasjon} />
                   </div>
                 ))}
               </div>
@@ -586,7 +595,7 @@ export default function ReiseplanGenerator() {
                   {plan.hoteller.map((h, i) => (
                     <div key={i} className="hotel-card">
                       <div className="hotel-img">
-                        <UnsplashImg query={h.bilde_sokeord || `hotel ${plan.destinasjon_engelsk || plan.destinasjon}`} />
+                        <TravelImg query={h.bilde_sokeord || `hotel ${plan.destinasjon_engelsk || plan.destinasjon}`} dest={plan.destinasjon_engelsk || plan.destinasjon} />
                       </div>
                       <div className="hotel-body">
                         <div className="hotel-platform">{h.type} · {h.kategori}</div>
@@ -623,7 +632,7 @@ export default function ReiseplanGenerator() {
                       <div className="day-body">
                         {dag.bilde_sokeord && (
                           <div className="day-img">
-                            <UnsplashImg query={`${plan.destinasjon_engelsk || plan.destinasjon} ${dag.bilde_sokeord}`} />
+                            <TravelImg query={`${plan.destinasjon_engelsk || plan.destinasjon} ${dag.bilde_sokeord}`} dest={plan.destinasjon_engelsk || plan.destinasjon} />
                           </div>
                         )}
                         {[["Morgen", dag.morgen], ["Ettermiddag", dag.ettermiddag], ["Kveld", dag.kveld]].map(([tid, innhold]) =>
