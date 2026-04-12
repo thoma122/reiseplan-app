@@ -425,14 +425,34 @@ const gradFor = (str="") => {
   const [c1,c2]=GRAD_COLORS[Math.abs(h)%GRAD_COLORS.length];
   return `linear-gradient(135deg,${c1},${c2})`;
 };
+
 const TravelImg = ({ query, dest="" }) => {
+  const [imgUrl, setImgUrl] = useState(null);
   const [failed, setFailed] = useState(false);
+
+  useState(() => {
+    const search = encodeURIComponent(query);
+    fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${search}&prop=pageimages&format=json&pithumbsize=800&origin=*`)
+      .then(r => r.json())
+      .then(data => {
+        const pages = data?.query?.pages;
+        const page = pages && Object.values(pages)[0];
+        const url = page?.thumbnail?.source;
+        if (url) setImgUrl(url);
+        else setFailed(true);
+      })
+      .catch(() => setFailed(true));
+  }, [query]);
+
   if (failed) return (
     <div style={{width:"100%",height:"100%",background:gradFor(dest+query),display:"flex",alignItems:"center",justifyContent:"center"}}>
       <span style={{color:"rgba(255,255,255,0.15)",fontSize:"11px",letterSpacing:"3px",textTransform:"uppercase"}}>{dest}</span>
     </div>
   );
-  return <img src={`https://loremflickr.com/800/500/${encodeURIComponent(query)}`} alt={query} style={{width:"100%",height:"100%",objectFit:"cover"}} onError={()=>setFailed(true)} />;
+
+  if (!imgUrl) return <div style={{width:"100%",height:"100%",background:gradFor(dest+query)}} />;
+
+  return <img src={imgUrl} alt={query} style={{width:"100%",height:"100%",objectFit:"cover"}} onError={()=>setFailed(true)} />;
 };
 
 export default function ReiseplanGenerator() {
