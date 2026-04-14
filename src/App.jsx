@@ -426,34 +426,20 @@ const gradFor = (str="") => {
   return `linear-gradient(135deg,${c1},${c2})`;
 };
 
+const strToNum = (str="") => {
+  let h=0; for(let i=0;i<str.length;i++) h=str.charCodeAt(i)+((h<<5)-h);
+  return Math.abs(h);
+};
+
 const TravelImg = ({ query, dest="" }) => {
-  const [imgUrl, setImgUrl] = useState(null);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    setImgUrl(null);
-    setFailed(false);
-    fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=800&origin=*`)
-      .then(r => r.json())
-      .then(data => {
-        const pages = data?.query?.pages;
-        const page = pages && Object.values(pages)[0];
-        const url = page?.thumbnail?.source;
-        if (url) setImgUrl(url);
-        else setFailed(true);
-      })
-      .catch(() => setFailed(true));
-  }, [query]);
-
-  if (failed) return (
-    <div style={{width:"100%",height:"100%",background:gradFor(dest+query),display:"flex",alignItems:"center",justifyContent:"center"}}>
-      <span style={{color:"rgba(255,255,255,0.15)",fontSize:"11px",letterSpacing:"3px",textTransform:"uppercase"}}>{dest}</span>
-    </div>
+  const seed = strToNum(dest + query) % 1000;
+  return (
+    <img
+      src={`https://picsum.photos/seed/${seed}/800/500`}
+      alt={query}
+      style={{width:"100%",height:"100%",objectFit:"cover"}}
+    />
   );
-
-  if (!imgUrl) return <div style={{width:"100%",height:"100%",background:gradFor(dest+query)}} />;
-
-  return <img src={imgUrl} alt={query} style={{width:"100%",height:"100%",objectFit:"cover"}} onError={()=>setFailed(true)} />;
 };
 
 export default function ReiseplanGenerator() {
