@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=DM+Sans:wght@300;400;500&display=swap');
@@ -430,9 +430,10 @@ const TravelImg = ({ query, dest="" }) => {
   const [imgUrl, setImgUrl] = useState(null);
   const [failed, setFailed] = useState(false);
 
-  useState(() => {
-    const search = encodeURIComponent(query);
-    fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${search}&prop=pageimages&format=json&pithumbsize=800&origin=*`)
+  useEffect(() => {
+    setImgUrl(null);
+    setFailed(false);
+    fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=800&origin=*`)
       .then(r => r.json())
       .then(data => {
         const pages = data?.query?.pages;
